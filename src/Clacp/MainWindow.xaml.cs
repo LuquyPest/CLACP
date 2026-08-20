@@ -3,10 +3,12 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 using Clacp.Models;
 using Clacp.Services;
 using Clacp.Views;
@@ -31,6 +33,7 @@ public partial class MainWindow : Window
     private int _quickTypeHotkeyId = -1;
     private int _clipboardHotkeyId = -1;
     private WinForms.NotifyIcon? _trayIcon;
+    private DispatcherTimer? _autoLockTimer;
     private bool _isExiting;
 
     private AppSettings _settings = new();
@@ -75,6 +78,50 @@ public partial class MainWindow : Window
 
         SetupTrayIcon();
         SetupHotkeys();
+        SetupAutoLock();
+    }
+
+    private void SetupAutoLock()
+    {
+        _autoLockTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
+        _autoLockTimer.Tick += (_, _) => CheckAutoLock();
+        _autoLockTimer.Start();
+    }
+
+    private void CheckAutoLock()
+    {
+        if (!_settings.VaultEnabled || !_settings.VaultProtectionEnabled || _session == null || _settings.AutoLockMinutes <= 0)
+            return;
+
+        if (GetIdleTimeMs() < _settings.AutoLockMinutes * 60_000L)
+            return;
+
+        LockVault();
+
+        if (IsVisible && WindowState != WindowState.Minimized)
+        {
+            if (!UnlockOrCreateVault())
+                System.Windows.Application.Current.Shutdown();
+        }
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct LASTINPUTINFO
+    {
+        public uint cbSize;
+        public uint dwTime;
+    }
+
+    [DllImport("user32.dll")]
+    private static extern bool GetLastInputInfo(ref LASTINPUTINFO plii);
+
+    private static long GetIdleTimeMs()
+    {
+        var info = new LASTINPUTINFO { cbSize = (uint)Marshal.SizeOf<LASTINPUTINFO>() };
+        if (!GetLastInputInfo(ref info))
+            return 0;
+
+        return unchecked((uint)Environment.TickCount64) - info.dwTime;
     }
 
     private bool UnlockOrCreateVault()
@@ -157,6 +204,12 @@ public partial class MainWindow : Window
         VaultProtectionToggle.IsChecked = _settings.VaultProtectionEnabled;
         VaultProtectionToggle.Content = _settings.VaultProtectionEnabled ? "Activee" : "Desactivee";
 
+        AutoLockBox.Text = _settings.AutoLockMinutes.ToString();
+
+        var startsWithWindows = StartupService.IsEnabled();
+        StartWithWindowsToggle.IsChecked = startsWithWindows;
+        StartWithWindowsToggle.Content = startsWithWindows ? "Activee" : "Desactivee";
+
         UpdateVaultFeatureVisibility();
     }
 
@@ -203,6 +256,11 @@ public partial class MainWindow : Window
         VaultProtectionToggle.Content = VaultProtectionToggle.IsChecked == true ? "Activee" : "Desactivee";
     }
 
+    private void OnStartWithWindowsToggleChanged(object sender, RoutedEventArgs e)
+    {
+        StartWithWindowsToggle.Content = StartWithWindowsToggle.IsChecked == true ? "Activee" : "Desactivee";
+    }
+
     private void OnHotkeyBoxPreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
         var key = e.Key == Key.System ? e.SystemKey : e.Key;
@@ -234,6 +292,12 @@ public partial class MainWindow : Window
         if (!int.TryParse(DelayBox.Text, out var delayMs) || delayMs < 0)
         {
             ShowSettingsError("Le delai doit etre un nombre entier positif.");
+            return;
+        }
+
+        if (!int.TryParse(AutoLockBox.Text, out var autoLockMinutes) || autoLockMinutes < 0)
+        {
+            ShowSettingsError("Le verrouillage automatique doit etre un nombre entier positif (0 pour desactiver).");
             return;
         }
 
@@ -277,11 +341,14 @@ public partial class MainWindow : Window
         _settings.VaultEnabled = vaultEnabled;
         _settings.VaultProtectionEnabled = protectionEnabled;
         _settings.RetypeDelayMs = delayMs;
+        _settings.AutoLockMinutes = autoLockMinutes;
         _settings.HotkeyModifiers = _pendingHotkeyModifiers;
         _settings.HotkeyKey = _pendingHotkeyKey;
         _settings.ClipboardHotkeyModifiers = _pendingClipboardHotkeyModifiers;
         _settings.ClipboardHotkeyKey = _pendingClipboardHotkeyKey;
         _settingsService.Save(_settings);
+
+        StartupService.SetEnabled(StartWithWindowsToggle.IsChecked == true);
 
         if (_settings.VaultEnabled)
             RegisterQuickTypeHotkey(_settings.HotkeyModifiers, _settings.HotkeyKey);
@@ -510,6 +577,7 @@ public partial class MainWindow : Window
     {
         if (_isExiting)
         {
+            _autoLockTimer?.Stop();
             _hotkeyService?.Dispose();
             if (_trayIcon != null)
             {

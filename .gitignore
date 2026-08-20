@@ -11,3 +11,4 @@ obj/
 ## Build output
 *.exe
 *.pdb
+publish/

@@ -69,6 +69,15 @@
                         <ToggleButton x:Name="VaultProtectionToggle" HorizontalAlignment="Left" Width="140"
                                       Checked="OnVaultProtectionToggleChanged" Unchecked="OnVaultProtectionToggleChanged"/>
 
+                        <TextBlock Text="Verrouillage automatique" FontWeight="SemiBold" Margin="0,28,0,4"/>
+                        <TextBlock Text="Verrouille le coffre protege apres N minutes d'inactivite (0 = desactive)." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,8"/>
+                        <TextBox x:Name="AutoLockBox" Width="150" HorizontalAlignment="Left"/>
+
+                        <TextBlock Text="Demarrage avec Windows" FontWeight="SemiBold" Margin="0,28,0,4"/>
+                        <TextBlock Text="Lance Clacp automatiquement a l'ouverture de session." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,8"/>
+                        <ToggleButton x:Name="StartWithWindowsToggle" HorizontalAlignment="Left" Width="140"
+                                      Checked="OnStartWithWindowsToggleChanged" Unchecked="OnStartWithWindowsToggleChanged"/>
+
                         <TextBlock Text="Delai avant frappe automatique" FontWeight="SemiBold" Margin="0,28,0,4"/>
                         <TextBlock Text="Temps laisse a la fenetre cible pour reprendre le focus, en millisecondes." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,8"/>
                         <TextBox x:Name="DelayBox" Width="150" HorizontalAlignment="Left"/>

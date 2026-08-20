@@ -16,4 +16,7 @@ public class AppSettings
     public bool VaultEnabled { get; set; } = false;
 
     public bool DarkThemeEnabled { get; set; } = true;
+
+    /// <summary>Minutes of system inactivity before the protected vault auto-locks. 0 disables auto-lock.</summary>
+    public int AutoLockMinutes { get; set; } = 5;
 }

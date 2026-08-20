@@ -1,12 +1,12 @@
-﻿<Application x:Class="Clacp.App"
+<Application x:Class="Clacp.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:Clacp"
-             StartupUri="MainWindow.xaml">
+             xmlns:local="clr-namespace:Clacp">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Themes/Theme.xaml"/>
+                <ResourceDictionary Source="Themes/ControlStyles.xaml"/>
+                <ResourceDictionary Source="Themes/Colors.Dark.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

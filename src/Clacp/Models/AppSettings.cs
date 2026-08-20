@@ -13,4 +13,7 @@ public class AppSettings
     public Key ClipboardHotkeyKey { get; set; } = Key.L;
 
     public bool VaultProtectionEnabled { get; set; } = false;
+    public bool VaultEnabled { get; set; } = false;
+
+    public bool DarkThemeEnabled { get; set; } = true;
 }

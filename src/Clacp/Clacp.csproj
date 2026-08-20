@@ -7,10 +7,18 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
-    <ApplicationIcon />
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
     <AssemblyName>Clacp</AssemblyName>
     <RootNamespace>Clacp</RootNamespace>
     <LangVersion>latest</LangVersion>
+    <Company>Lylian Fredon (Daryu)</Company>
+    <Authors>Lylian Fredon (Daryu)</Authors>
+    <Product>Clacp</Product>
+    <Copyright>© Lylian Fredon « Daryu » - tous droits reserves</Copyright>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\app.ico" />
+  </ItemGroup>
 
 </Project>

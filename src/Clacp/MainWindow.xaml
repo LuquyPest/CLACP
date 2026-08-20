@@ -5,32 +5,32 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Clacp"
         mc:Ignorable="d"
-        Title="Clacp" Height="520" Width="760"
+        Title="Clacp" Height="560" Width="760"
+        Icon="Assets/app.ico"
         WindowStartupLocation="CenterScreen"
-        Background="{StaticResource BackgroundBrush}"
-        Foreground="{StaticResource TextPrimaryBrush}"
-        FontFamily="{StaticResource AppFont}"
+        Background="{DynamicResource BackgroundBrush}"
+        Foreground="{DynamicResource TextPrimaryBrush}"
         StateChanged="OnStateChanged"
         Closing="OnClosing">
     <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
             <TextBlock Text="Clacp" FontSize="22" FontWeight="Bold" VerticalAlignment="Center"/>
-            <TextBlock Text="gestionnaire de mots de passe" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"
+            <TextBlock Text="gestionnaire de mots de passe" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}"
                        VerticalAlignment="Center" Margin="10,4,0,0"/>
         </StackPanel>
 
         <TabControl x:Name="MainTabControl" Grid.Row="1" SelectionChanged="OnTabControlSelectionChanged">
-            <TabItem Header="COFFRE">
+            <TabItem x:Name="CoffreTab" Header="COFFRE">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
@@ -48,30 +48,38 @@
                             <DataGridTextColumn Header="URL" Binding="{Binding Url}" Width="3*"/>
                         </DataGrid.Columns>
                     </DataGrid>
-
-                    <TextBlock x:Name="HotkeyHint" Grid.Row="2" Margin="0,16,0,0" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
                 </Grid>
             </TabItem>
 
-            <TabItem Header="PARAMETRES">
+            <TabItem x:Name="ParametresTab" Header="PARAMETRES">
                 <ScrollViewer x:Name="SettingsScrollViewer" VerticalScrollBarVisibility="Auto">
                     <StackPanel MaxWidth="440" HorizontalAlignment="Left">
-                        <TextBlock Text="Protection par mot de passe maitre" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                        <TextBlock Text="Si desactivee, l'application s'ouvre directement sans demander de mot de passe. Les donnees restent chiffrees automatiquement (liees a votre session Windows)." Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,8" TextWrapping="Wrap"/>
+                        <TextBlock Text="Apparence" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <TextBlock Text="Choisissez entre le theme sombre ou clair." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,8"/>
+                        <ToggleButton x:Name="ThemeToggle" HorizontalAlignment="Left" Width="140"
+                                      Checked="OnThemeToggleChanged" Unchecked="OnThemeToggleChanged"/>
+
+                        <TextBlock Text="Fonctionnalite coffre de mots de passe" FontWeight="SemiBold" Margin="0,28,0,4"/>
+                        <TextBlock Text="Active la liste d'entrees (onglet Coffre) et la recherche par raccourci. Desactivee, seul le raccourci presse-papiers fonctionne." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,8" TextWrapping="Wrap"/>
+                        <ToggleButton x:Name="VaultEnabledToggle" HorizontalAlignment="Left" Width="140"
+                                      Checked="OnVaultEnabledToggleChanged" Unchecked="OnVaultEnabledToggleChanged"/>
+
+                        <TextBlock Text="Protection par mot de passe maitre" FontWeight="SemiBold" Margin="0,28,0,4"/>
+                        <TextBlock Text="Si desactivee, le coffre s'ouvre directement sans demander de mot de passe. Les donnees restent chiffrees automatiquement (liees a votre session Windows)." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,8" TextWrapping="Wrap"/>
                         <ToggleButton x:Name="VaultProtectionToggle" HorizontalAlignment="Left" Width="140"
                                       Checked="OnVaultProtectionToggleChanged" Unchecked="OnVaultProtectionToggleChanged"/>
 
                         <TextBlock Text="Delai avant frappe automatique" FontWeight="SemiBold" Margin="0,28,0,4"/>
-                        <TextBlock Text="Temps laisse a la fenetre cible pour reprendre le focus, en millisecondes." Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,8"/>
+                        <TextBlock Text="Temps laisse a la fenetre cible pour reprendre le focus, en millisecondes." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,8"/>
                         <TextBox x:Name="DelayBox" Width="150" HorizontalAlignment="Left"/>
 
                         <TextBlock Text="Raccourci : recherche et frappe d'une entree" FontWeight="SemiBold" Margin="0,28,0,4"/>
-                        <TextBlock Text="Cliquez dans le champ puis appuyez sur la nouvelle combinaison de touches." Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,8"/>
+                        <TextBlock Text="Cliquez dans le champ puis appuyez sur la nouvelle combinaison de touches." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,8"/>
                         <TextBox x:Name="HotkeyBox" Width="280" HorizontalAlignment="Left"
                                  IsReadOnly="True" Focusable="True" PreviewKeyDown="OnHotkeyBoxPreviewKeyDown"/>
 
                         <TextBlock Text="Raccourci : taper le contenu du presse-papiers" FontWeight="SemiBold" Margin="0,28,0,4"/>
-                        <TextBlock Text="Tape directement le texte copie dans le presse-papiers, dans la fenetre active." Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,8"/>
+                        <TextBlock Text="Tape directement le texte copie dans le presse-papiers, dans la fenetre active." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,8"/>
                         <TextBox x:Name="ClipboardHotkeyBox" Width="280" HorizontalAlignment="Left"
                                  IsReadOnly="True" Focusable="True" PreviewKeyDown="OnClipboardHotkeyBoxPreviewKeyDown"/>
 
@@ -82,5 +90,8 @@
                 </ScrollViewer>
             </TabItem>
         </TabControl>
+
+        <TextBlock Grid.Row="2" Text="Developpe par Lylian Fredon &#171; Daryu &#187; - tous droits reserves"
+                   Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10" HorizontalAlignment="Center" Margin="0,16,0,0"/>
     </Grid>
 </Window>

@@ -50,18 +50,21 @@ public partial class MainWindow : Window
     {
         _settings = _settingsService.Load();
 
-        if (_settings.VaultProtectionEnabled)
+        if (_settings.VaultEnabled)
         {
-            if (!UnlockOrCreateVault())
+            if (_settings.VaultProtectionEnabled)
             {
-                System.Windows.Application.Current.Shutdown();
-                return;
+                if (!UnlockOrCreateVault())
+                {
+                    System.Windows.Application.Current.Shutdown();
+                    return;
+                }
             }
-        }
-        else
-        {
-            _session = _vaultService.LoadOrCreateLocalVault();
-            RefreshEntries();
+            else
+            {
+                _session = _vaultService.LoadOrCreateLocalVault();
+                RefreshEntries();
+            }
         }
 
         _pendingHotkeyModifiers = _settings.HotkeyModifiers;
@@ -100,7 +103,10 @@ public partial class MainWindow : Window
     private void SetupHotkeys()
     {
         _hotkeyService = new HotkeyService(this);
-        RegisterQuickTypeHotkey(_settings.HotkeyModifiers, _settings.HotkeyKey);
+
+        if (_settings.VaultEnabled)
+            RegisterQuickTypeHotkey(_settings.HotkeyModifiers, _settings.HotkeyKey);
+
         RegisterClipboardHotkey(_settings.ClipboardHotkeyModifiers, _settings.ClipboardHotkeyKey);
     }
 
@@ -118,8 +124,6 @@ public partial class MainWindow : Window
                 $"Impossible d'enregistrer le raccourci {FormatHotkey(modifiers, key)} (deja utilise par une autre application).",
                 "Clacp", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
-
-        RefreshHotkeyHint();
     }
 
     private void RegisterClipboardHotkey(ModifierKeys modifiers, Key key)
@@ -138,25 +142,33 @@ public partial class MainWindow : Window
         }
     }
 
-    private void RefreshHotkeyHint()
-    {
-        HotkeyHint.Text = $"Raccourci global : {FormatHotkey(_settings.HotkeyModifiers, _settings.HotkeyKey)} pour rechercher et taper une entree";
-    }
-
     private void PopulateSettingsUi()
     {
         DelayBox.Text = _settings.RetypeDelayMs.ToString();
         HotkeyBox.Text = FormatHotkey(_settings.HotkeyModifiers, _settings.HotkeyKey);
         ClipboardHotkeyBox.Text = FormatHotkey(_settings.ClipboardHotkeyModifiers, _settings.ClipboardHotkeyKey);
+
+        ThemeToggle.IsChecked = _settings.DarkThemeEnabled;
+        ThemeToggle.Content = _settings.DarkThemeEnabled ? "Sombre" : "Claire";
+
+        VaultEnabledToggle.IsChecked = _settings.VaultEnabled;
+        VaultEnabledToggle.Content = _settings.VaultEnabled ? "Activee" : "Desactivee";
+
         VaultProtectionToggle.IsChecked = _settings.VaultProtectionEnabled;
         VaultProtectionToggle.Content = _settings.VaultProtectionEnabled ? "Activee" : "Desactivee";
-        UpdateLockButtonVisibility();
-        RefreshHotkeyHint();
+
+        UpdateVaultFeatureVisibility();
     }
 
-    private void UpdateLockButtonVisibility()
+    private void UpdateVaultFeatureVisibility()
     {
-        LockButton.Visibility = _settings.VaultProtectionEnabled ? Visibility.Visible : Visibility.Collapsed;
+        CoffreTab.Visibility = _settings.VaultEnabled ? Visibility.Visible : Visibility.Collapsed;
+        if (!_settings.VaultEnabled && MainTabControl.SelectedItem == CoffreTab)
+            MainTabControl.SelectedItem = ParametresTab;
+
+        LockButton.Visibility = (_settings.VaultEnabled && _settings.VaultProtectionEnabled)
+            ? Visibility.Visible
+            : Visibility.Collapsed;
     }
 
     private static string FormatHotkey(ModifierKeys modifiers, Key key)
@@ -174,6 +186,16 @@ public partial class MainWindow : Window
     {
         if (e.OriginalSource == MainTabControl)
             SettingsScrollViewer.ScrollToTop();
+    }
+
+    private void OnThemeToggleChanged(object sender, RoutedEventArgs e)
+    {
+        ThemeToggle.Content = ThemeToggle.IsChecked == true ? "Sombre" : "Claire";
+    }
+
+    private void OnVaultEnabledToggleChanged(object sender, RoutedEventArgs e)
+    {
+        VaultEnabledToggle.Content = VaultEnabledToggle.IsChecked == true ? "Activee" : "Desactivee";
     }
 
     private void OnVaultProtectionToggleChanged(object sender, RoutedEventArgs e)
@@ -233,10 +255,27 @@ public partial class MainWindow : Window
             return;
         }
 
-        var protectionEnabled = VaultProtectionToggle.IsChecked == true;
-        if (protectionEnabled != _settings.VaultProtectionEnabled && !SwitchVaultProtection(protectionEnabled))
-            return;
+        _settings.DarkThemeEnabled = ThemeToggle.IsChecked == true;
+        ThemeManager.Apply(_settings.DarkThemeEnabled);
 
+        var vaultEnabled = VaultEnabledToggle.IsChecked == true;
+        var protectionEnabled = VaultProtectionToggle.IsChecked == true;
+
+        if (vaultEnabled)
+        {
+            var needsSessionSwitch = protectionEnabled != _settings.VaultProtectionEnabled || _session == null;
+            if (needsSessionSwitch && !SwitchVaultProtection(protectionEnabled))
+                return;
+        }
+        else
+        {
+            _session?.Lock();
+            _session = null;
+            _entries.Clear();
+        }
+
+        _settings.VaultEnabled = vaultEnabled;
+        _settings.VaultProtectionEnabled = protectionEnabled;
         _settings.RetypeDelayMs = delayMs;
         _settings.HotkeyModifiers = _pendingHotkeyModifiers;
         _settings.HotkeyKey = _pendingHotkeyKey;
@@ -244,9 +283,13 @@ public partial class MainWindow : Window
         _settings.ClipboardHotkeyKey = _pendingClipboardHotkeyKey;
         _settingsService.Save(_settings);
 
-        RegisterQuickTypeHotkey(_settings.HotkeyModifiers, _settings.HotkeyKey);
+        if (_settings.VaultEnabled)
+            RegisterQuickTypeHotkey(_settings.HotkeyModifiers, _settings.HotkeyKey);
+        else
+            _hotkeyService?.Unregister(_quickTypeHotkeyId);
+
         RegisterClipboardHotkey(_settings.ClipboardHotkeyModifiers, _settings.ClipboardHotkeyKey);
-        UpdateLockButtonVisibility();
+        UpdateVaultFeatureVisibility();
 
         SettingsStatusText.Foreground = System.Windows.Media.Brushes.Green;
         SettingsStatusText.Text = "Parametres enregistres.";
@@ -292,7 +335,7 @@ public partial class MainWindow : Window
 
     private void OnHotkeyPressed()
     {
-        if (_session == null || _entries.Count == 0)
+        if (!_settings.VaultEnabled || _session == null || _entries.Count == 0)
             return;
 
         var targetWindow = ForegroundWindowHelper.GetCurrentForegroundWindow();
@@ -390,7 +433,7 @@ public partial class MainWindow : Window
 
     private void OnLockClick(object sender, RoutedEventArgs e)
     {
-        if (!_settings.VaultProtectionEnabled)
+        if (!_settings.VaultEnabled || !_settings.VaultProtectionEnabled)
             return;
 
         LockVault();
@@ -422,7 +465,7 @@ public partial class MainWindow : Window
 
         var menu = new WinForms.ContextMenuStrip();
         menu.Items.Add("Ouvrir", null, (_, _) => ShowMainWindow());
-        menu.Items.Add("Verrouiller", null, (_, _) => { if (_settings.VaultProtectionEnabled) LockVault(); });
+        menu.Items.Add("Verrouiller", null, (_, _) => { if (_settings.VaultEnabled && _settings.VaultProtectionEnabled) LockVault(); });
         menu.Items.Add(new WinForms.ToolStripSeparator());
         menu.Items.Add("Quitter", null, (_, _) => ExitApplication());
         _trayIcon.ContextMenuStrip = menu;
@@ -436,7 +479,7 @@ public partial class MainWindow : Window
         WindowState = WindowState.Normal;
         Activate();
 
-        if (_session == null)
+        if (_settings.VaultEnabled && _session == null)
         {
             if (_settings.VaultProtectionEnabled)
             {

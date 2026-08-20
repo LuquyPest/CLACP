@@ -96,7 +96,7 @@ public partial class MainWindow : Window
     private static async Task TypeSelectedEntryAsync(VaultEntry entry, IntPtr targetWindow)
     {
         ForegroundWindowHelper.RestoreForegroundWindow(targetWindow);
-        await Task.Delay(150);
+        await Task.Delay(450);
 
         var sequence = entry.AutoType == AutoTypeMode.PasswordOnly
             ? entry.Password

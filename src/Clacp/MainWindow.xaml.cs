@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -15,13 +16,24 @@ namespace Clacp;
 
 public partial class MainWindow : Window
 {
+    private static readonly Key[] ModifierOnlyKeys =
+    {
+        Key.LeftCtrl, Key.RightCtrl, Key.LeftAlt, Key.RightAlt,
+        Key.LeftShift, Key.RightShift, Key.LWin, Key.RWin,
+    };
+
     private readonly VaultService _vaultService = new();
+    private readonly SettingsService _settingsService = new();
     private readonly ObservableCollection<VaultEntry> _entries = new();
 
     private VaultSession? _session;
     private HotkeyService? _hotkeyService;
     private WinForms.NotifyIcon? _trayIcon;
     private bool _isExiting;
+
+    private AppSettings _settings = new();
+    private ModifierKeys _pendingHotkeyModifiers;
+    private Key _pendingHotkeyKey;
 
     public MainWindow()
     {
@@ -37,6 +49,11 @@ public partial class MainWindow : Window
             System.Windows.Application.Current.Shutdown();
             return;
         }
+
+        _settings = _settingsService.Load();
+        _pendingHotkeyModifiers = _settings.HotkeyModifiers;
+        _pendingHotkeyKey = _settings.HotkeyKey;
+        PopulateSettingsUi();
 
         SetupTrayIcon();
         SetupHotkey();
@@ -69,12 +86,87 @@ public partial class MainWindow : Window
     {
         _hotkeyService = new HotkeyService(this);
         _hotkeyService.HotkeyPressed += OnHotkeyPressed;
-        if (!_hotkeyService.Register(ModifierKeys.Control | ModifierKeys.Alt, Key.P))
+        RegisterHotkey(_settings.HotkeyModifiers, _settings.HotkeyKey);
+    }
+
+    private bool RegisterHotkey(ModifierKeys modifiers, Key key)
+    {
+        if (_hotkeyService == null)
+            return false;
+
+        var ok = _hotkeyService.Register(modifiers, key);
+        if (!ok)
         {
             System.Windows.MessageBox.Show(this,
-                "Impossible d'enregistrer le raccourci Ctrl+Alt+P (deja utilise par une autre application).",
+                $"Impossible d'enregistrer le raccourci {FormatHotkey(modifiers, key)} (deja utilise par une autre application).",
                 "Clacp", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
+
+        RefreshHotkeyHint();
+        return ok;
+    }
+
+    private void RefreshHotkeyHint()
+    {
+        HotkeyHint.Text = $"Raccourci global : {FormatHotkey(_settings.HotkeyModifiers, _settings.HotkeyKey)} pour rechercher et taper une entree";
+    }
+
+    private void PopulateSettingsUi()
+    {
+        DelayBox.Text = _settings.RetypeDelayMs.ToString();
+        HotkeyBox.Text = FormatHotkey(_settings.HotkeyModifiers, _settings.HotkeyKey);
+        RefreshHotkeyHint();
+    }
+
+    private static string FormatHotkey(ModifierKeys modifiers, Key key)
+    {
+        var parts = new StringBuilder();
+        if (modifiers.HasFlag(ModifierKeys.Control)) parts.Append("Ctrl + ");
+        if (modifiers.HasFlag(ModifierKeys.Alt)) parts.Append("Alt + ");
+        if (modifiers.HasFlag(ModifierKeys.Shift)) parts.Append("Maj + ");
+        if (modifiers.HasFlag(ModifierKeys.Windows)) parts.Append("Win + ");
+        parts.Append(key);
+        return parts.ToString();
+    }
+
+    private void OnHotkeyBoxPreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        var key = e.Key == Key.System ? e.SystemKey : e.Key;
+        e.Handled = true;
+
+        if (Array.IndexOf(ModifierOnlyKeys, key) >= 0)
+            return;
+
+        _pendingHotkeyModifiers = Keyboard.Modifiers;
+        _pendingHotkeyKey = key;
+        HotkeyBox.Text = FormatHotkey(_pendingHotkeyModifiers, _pendingHotkeyKey);
+    }
+
+    private void OnSaveSettingsClick(object sender, RoutedEventArgs e)
+    {
+        if (!int.TryParse(DelayBox.Text, out var delayMs) || delayMs < 0)
+        {
+            SettingsStatusText.Foreground = System.Windows.Media.Brushes.Red;
+            SettingsStatusText.Text = "Le delai doit etre un nombre entier positif.";
+            return;
+        }
+
+        if (_pendingHotkeyModifiers == ModifierKeys.None)
+        {
+            SettingsStatusText.Foreground = System.Windows.Media.Brushes.Red;
+            SettingsStatusText.Text = "Le raccourci doit inclure au moins une touche de modification (Ctrl, Alt, Maj ou Win).";
+            return;
+        }
+
+        _settings.RetypeDelayMs = delayMs;
+        _settings.HotkeyModifiers = _pendingHotkeyModifiers;
+        _settings.HotkeyKey = _pendingHotkeyKey;
+        _settingsService.Save(_settings);
+
+        RegisterHotkey(_settings.HotkeyModifiers, _settings.HotkeyKey);
+
+        SettingsStatusText.Foreground = System.Windows.Media.Brushes.Green;
+        SettingsStatusText.Text = "Parametres enregistres.";
     }
 
     private void OnHotkeyPressed()
@@ -89,14 +181,14 @@ public partial class MainWindow : Window
 
         if (result == true && popup.SelectedEntry != null)
         {
-            _ = TypeSelectedEntryAsync(popup.SelectedEntry, targetWindow);
+            _ = TypeSelectedEntryAsync(popup.SelectedEntry, targetWindow, _settings.RetypeDelayMs);
         }
     }
 
-    private static async Task TypeSelectedEntryAsync(VaultEntry entry, IntPtr targetWindow)
+    private static async Task TypeSelectedEntryAsync(VaultEntry entry, IntPtr targetWindow, int delayMs)
     {
         ForegroundWindowHelper.RestoreForegroundWindow(targetWindow);
-        await Task.Delay(5000);
+        await Task.Delay(delayMs);
 
         var sequence = entry.AutoType == AutoTypeMode.PasswordOnly
             ? entry.Password

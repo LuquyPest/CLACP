@@ -9,30 +9,51 @@
         WindowStartupLocation="CenterScreen"
         StateChanged="OnStateChanged"
         Closing="OnClosing">
-    <Grid Margin="15">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    <TabControl Margin="15">
+        <TabItem Header="Coffre">
+            <Grid Margin="15">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
-            <Button x:Name="AddButton" Content="Ajouter" Padding="10,6" Margin="0,0,8,0" Click="OnAddClick"/>
-            <Button x:Name="EditButton" Content="Modifier" Padding="10,6" Margin="0,0,8,0" Click="OnEditClick"/>
-            <Button x:Name="DeleteButton" Content="Supprimer" Padding="10,6" Margin="0,0,8,0" Click="OnDeleteClick"/>
-            <Button x:Name="LockButton" Content="Verrouiller" Padding="10,6" Click="OnLockClick"/>
-        </StackPanel>
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                    <Button x:Name="AddButton" Content="Ajouter" Padding="10,6" Margin="0,0,8,0" Click="OnAddClick"/>
+                    <Button x:Name="EditButton" Content="Modifier" Padding="10,6" Margin="0,0,8,0" Click="OnEditClick"/>
+                    <Button x:Name="DeleteButton" Content="Supprimer" Padding="10,6" Margin="0,0,8,0" Click="OnDeleteClick"/>
+                    <Button x:Name="LockButton" Content="Verrouiller" Padding="10,6" Click="OnLockClick"/>
+                </StackPanel>
 
-        <DataGrid x:Name="EntriesGrid" Grid.Row="1" AutoGenerateColumns="False" IsReadOnly="True"
-                  SelectionMode="Single" GridLinesVisibility="Horizontal" MouseDoubleClick="OnEditClick">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Titre" Binding="{Binding Title}" Width="2*"/>
-                <DataGridTextColumn Header="Nom d'utilisateur" Binding="{Binding Username}" Width="2*"/>
-                <DataGridTextColumn Header="URL" Binding="{Binding Url}" Width="3*"/>
-            </DataGrid.Columns>
-        </DataGrid>
+                <DataGrid x:Name="EntriesGrid" Grid.Row="1" AutoGenerateColumns="False" IsReadOnly="True"
+                          SelectionMode="Single" GridLinesVisibility="Horizontal" MouseDoubleClick="OnEditClick">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Titre" Binding="{Binding Title}" Width="2*"/>
+                        <DataGridTextColumn Header="Nom d'utilisateur" Binding="{Binding Username}" Width="2*"/>
+                        <DataGridTextColumn Header="URL" Binding="{Binding Url}" Width="3*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
 
-        <TextBlock x:Name="HotkeyHint" Grid.Row="2" Margin="0,10,0,0" Foreground="Gray"
-                   Text="Raccourci global : Ctrl+Alt+P pour rechercher et taper une entree"/>
-    </Grid>
+                <TextBlock x:Name="HotkeyHint" Grid.Row="2" Margin="0,10,0,0" Foreground="Gray"/>
+            </Grid>
+        </TabItem>
+
+        <TabItem Header="Parametres">
+            <StackPanel Margin="20">
+                <TextBlock Text="Delai avant frappe automatique (millisecondes)" Margin="0,0,0,4"/>
+                <TextBox x:Name="DelayBox" Padding="6" Width="150" HorizontalAlignment="Left"/>
+
+                <TextBlock Text="Raccourci clavier global" Margin="0,20,0,4"/>
+                <TextBox x:Name="HotkeyBox" Padding="6" Width="250" HorizontalAlignment="Left"
+                         IsReadOnly="True" Focusable="True" PreviewKeyDown="OnHotkeyBoxPreviewKeyDown"/>
+                <TextBlock Text="Cliquez dans le champ ci-dessus puis appuyez sur la nouvelle combinaison de touches."
+                           Foreground="Gray" FontSize="11" Margin="0,4,0,0"/>
+
+                <Button x:Name="SaveSettingsButton" Content="Enregistrer" Padding="10,6"
+                        HorizontalAlignment="Left" Margin="0,20,0,0" Click="OnSaveSettingsClick"/>
+
+                <TextBlock x:Name="SettingsStatusText" Foreground="Green" Margin="0,10,0,0"/>
+            </StackPanel>
+        </TabItem>
+    </TabControl>
 </Window>

@@ -1,0 +1,32 @@
+Clacp - Licence d'utilisation
+
+Copyright (c) Lylian Fredon « Daryu ». Tous droits reserves.
+
+Ce logiciel et son code source sont la propriete exclusive de Lylian Fredon
+(« Daryu »). En installant, copiant ou utilisant ce logiciel, vous acceptez
+les conditions suivantes :
+
+1. Utilisation
+   Vous pouvez installer et utiliser ce logiciel a titre personnel.
+
+2. Interdictions
+   Sauf accord ecrit prealable de l'auteur, il est interdit de :
+   - reutiliser, copier ou redistribuer ce logiciel ou son code source, en
+     tout ou partie, dans un autre projet ou logiciel ;
+   - modifier, adapter, decompiler ou creer une oeuvre derivee a partir de
+     ce logiciel ou de son code source ;
+   - vendre, sous-licencier, louer ou monetiser de quelque maniere que ce
+     soit ce logiciel, son code source, ou toute oeuvre derivee.
+
+3. Aucune garantie
+   Ce logiciel est fourni "en l'etat", sans garantie d'aucune sorte,
+   expresse ou implicite, y compris sans garantie de qualite marchande ou
+   d'adequation a un usage particulier. L'auteur ne pourra etre tenu
+   responsable d'aucun dommage decoulant de l'utilisation de ce logiciel.
+
+4. Contact
+   Toute demande d'autorisation (reutilisation, modification, revente)
+   doit etre adressee directement a Lylian Fredon (« Daryu »).
+
+En cliquant sur "J'accepte" lors de l'installation, vous confirmez avoir
+lu et accepte les termes de cette licence.

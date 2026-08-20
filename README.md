@@ -41,3 +41,17 @@ dotnet publish src/Clacp/Clacp.csproj -c Release -r win-x64 --self-contained tru
 ```
 
 Produit un `publish/Clacp.exe` unique, copiable et executable sur n'importe quel Windows 10/11 x64 sans installer .NET.
+
+## Generer l'installateur (avec licence et desinstallation)
+
+Necessite [Inno Setup 6](https://jrsoftware.org/isinfo.php). Publier d'abord l'executable autonome (etape precedente), puis :
+
+```powershell
+& "$env:LocalAppData\Programs\Inno Setup 6\ISCC.exe" installer\Clacp.iss
+```
+
+Produit `installer-output\Clacp-Setup.exe` : installation par utilisateur (pas de droits admin requis), ecran de licence obligatoire (`LICENSE.txt`), raccourcis Menu Demarrer/Bureau optionnels, et entree de desinstallation standard dans "Applications installees" de Windows.
+
+## Licence
+
+Voir [LICENSE.txt](LICENSE.txt). Logiciel proprietaire : reutilisation, modification et revente interdites sans l'accord ecrit de l'auteur.

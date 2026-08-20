@@ -12,3 +12,4 @@ obj/
 *.exe
 *.pdb
 publish/
+installer-output/

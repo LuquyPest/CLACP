@@ -28,7 +28,7 @@ public partial class UnlockWindow : Window
         Loaded += (_, _) => PasswordBox1.Focus();
     }
 
-    private void OnPasswordKeyDown(object sender, KeyEventArgs e)
+    private void OnPasswordKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
         if (e.Key == Key.Enter)
             OnActionClick(sender, e);

@@ -49,7 +49,7 @@ public partial class QuickTypeWindow : Window
     private static bool Contains(string source, string value)
         => source.Contains(value, StringComparison.CurrentCultureIgnoreCase);
 
-    private void OnSearchPreviewKeyDown(object sender, KeyEventArgs e)
+    private void OnSearchPreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
         switch (e.Key)
         {

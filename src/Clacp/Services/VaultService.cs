@@ -12,15 +12,48 @@ public class VaultService
     private static readonly byte[] Magic = Encoding.ASCII.GetBytes("CLCP1");
 
     public string VaultPath { get; }
+    public string LocalVaultPath { get; }
 
     public VaultService()
     {
         var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Clacp");
         Directory.CreateDirectory(dir);
         VaultPath = Path.Combine(dir, "vault.dat");
+        LocalVaultPath = Path.Combine(dir, "local-vault.dat");
     }
 
     public bool VaultExists() => File.Exists(VaultPath);
+
+    /// <summary>Loads (or creates) the unprotected vault: no master password, encrypted at rest via
+    /// Windows DPAPI and tied to the current Windows user account.</summary>
+    public VaultSession LoadOrCreateLocalVault()
+    {
+        var data = new VaultData();
+
+        if (File.Exists(LocalVaultPath))
+        {
+            try
+            {
+                var encrypted = File.ReadAllBytes(LocalVaultPath);
+                var plaintext = DpapiHelper.Unprotect(encrypted);
+                data = JsonSerializer.Deserialize<VaultData>(plaintext) ?? new VaultData();
+            }
+            catch (CryptographicException)
+            {
+                data = new VaultData();
+            }
+        }
+
+        return new VaultSession(this, data);
+    }
+
+    internal void WriteLocalFile(byte[] encrypted)
+    {
+        var tempPath = LocalVaultPath + ".tmp";
+        File.WriteAllBytes(tempPath, encrypted);
+        File.Copy(tempPath, LocalVaultPath, overwrite: true);
+        File.Delete(tempPath);
+    }
 
     public VaultSession CreateVault(string masterPassword)
     {

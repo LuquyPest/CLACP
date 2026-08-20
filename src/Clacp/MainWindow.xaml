@@ -24,7 +24,7 @@
                        VerticalAlignment="Center" Margin="10,4,0,0"/>
         </StackPanel>
 
-        <TabControl Grid.Row="1">
+        <TabControl x:Name="MainTabControl" Grid.Row="1" SelectionChanged="OnTabControlSelectionChanged">
             <TabItem Header="COFFRE">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -54,20 +54,32 @@
             </TabItem>
 
             <TabItem Header="PARAMETRES">
-                <StackPanel MaxWidth="420" HorizontalAlignment="Left">
-                    <TextBlock Text="Delai avant frappe automatique" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                    <TextBlock Text="Temps laisse a la fenetre cible pour reprendre le focus, en millisecondes." Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,8"/>
-                    <TextBox x:Name="DelayBox" Width="150" HorizontalAlignment="Left"/>
+                <ScrollViewer x:Name="SettingsScrollViewer" VerticalScrollBarVisibility="Auto">
+                    <StackPanel MaxWidth="440" HorizontalAlignment="Left">
+                        <TextBlock Text="Protection par mot de passe maitre" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <TextBlock Text="Si desactivee, l'application s'ouvre directement sans demander de mot de passe. Les donnees restent chiffrees automatiquement (liees a votre session Windows)." Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,8" TextWrapping="Wrap"/>
+                        <ToggleButton x:Name="VaultProtectionToggle" HorizontalAlignment="Left" Width="140"
+                                      Checked="OnVaultProtectionToggleChanged" Unchecked="OnVaultProtectionToggleChanged"/>
 
-                    <TextBlock Text="Raccourci clavier global" FontWeight="SemiBold" Margin="0,28,0,4"/>
-                    <TextBlock Text="Cliquez dans le champ puis appuyez sur la nouvelle combinaison de touches." Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,8"/>
-                    <TextBox x:Name="HotkeyBox" Width="280" HorizontalAlignment="Left"
-                             IsReadOnly="True" Focusable="True" PreviewKeyDown="OnHotkeyBoxPreviewKeyDown"/>
+                        <TextBlock Text="Delai avant frappe automatique" FontWeight="SemiBold" Margin="0,28,0,4"/>
+                        <TextBlock Text="Temps laisse a la fenetre cible pour reprendre le focus, en millisecondes." Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,8"/>
+                        <TextBox x:Name="DelayBox" Width="150" HorizontalAlignment="Left"/>
 
-                    <Button x:Name="SaveSettingsButton" Content="Enregistrer" HorizontalAlignment="Left" Margin="0,28,0,0" Click="OnSaveSettingsClick"/>
+                        <TextBlock Text="Raccourci : recherche et frappe d'une entree" FontWeight="SemiBold" Margin="0,28,0,4"/>
+                        <TextBlock Text="Cliquez dans le champ puis appuyez sur la nouvelle combinaison de touches." Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,8"/>
+                        <TextBox x:Name="HotkeyBox" Width="280" HorizontalAlignment="Left"
+                                 IsReadOnly="True" Focusable="True" PreviewKeyDown="OnHotkeyBoxPreviewKeyDown"/>
 
-                    <TextBlock x:Name="SettingsStatusText" Margin="0,14,0,0" FontSize="12"/>
-                </StackPanel>
+                        <TextBlock Text="Raccourci : taper le contenu du presse-papiers" FontWeight="SemiBold" Margin="0,28,0,4"/>
+                        <TextBlock Text="Tape directement le texte copie dans le presse-papiers, dans la fenetre active." Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,8"/>
+                        <TextBox x:Name="ClipboardHotkeyBox" Width="280" HorizontalAlignment="Left"
+                                 IsReadOnly="True" Focusable="True" PreviewKeyDown="OnClipboardHotkeyBoxPreviewKeyDown"/>
+
+                        <Button x:Name="SaveSettingsButton" Content="Enregistrer" HorizontalAlignment="Left" Margin="0,28,0,0" Click="OnSaveSettingsClick"/>
+
+                        <TextBlock x:Name="SettingsStatusText" Margin="0,14,0,0" FontSize="12" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </ScrollViewer>
             </TabItem>
         </TabControl>
     </Grid>

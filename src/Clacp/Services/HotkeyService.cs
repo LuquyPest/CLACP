@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
@@ -13,7 +14,6 @@ public class HotkeyService : IDisposable
     private const uint MOD_CONTROL = 0x0002;
     private const uint MOD_SHIFT = 0x0004;
     private const uint MOD_WIN = 0x0008;
-    private const int HotkeyId = 0x2A2C;
 
     [DllImport("user32.dll")]
     private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
@@ -23,9 +23,8 @@ public class HotkeyService : IDisposable
 
     private readonly HwndSource _source;
     private readonly IntPtr _handle;
-    private bool _registered;
-
-    public event Action? HotkeyPressed;
+    private readonly Dictionary<int, Action> _handlers = new();
+    private int _nextId = 0xA000;
 
     public HotkeyService(Window window)
     {
@@ -38,15 +37,27 @@ public class HotkeyService : IDisposable
         _source.AddHook(WndProc);
     }
 
-    public bool Register(ModifierKeys modifiers, Key key)
+    /// <summary>Registers a new global hotkey and returns its id, or -1 if registration failed.</summary>
+    public int Register(ModifierKeys modifiers, Key key, Action onPressed)
     {
-        if (_registered)
-            UnregisterHotKey(_handle, HotkeyId);
-
+        var id = _nextId++;
         var vk = (uint)KeyInterop.VirtualKeyFromKey(key);
         var mod = ConvertModifiers(modifiers);
-        _registered = RegisterHotKey(_handle, HotkeyId, mod, vk);
-        return _registered;
+
+        if (!RegisterHotKey(_handle, id, mod, vk))
+            return -1;
+
+        _handlers[id] = onPressed;
+        return id;
+    }
+
+    public void Unregister(int id)
+    {
+        if (id < 0)
+            return;
+
+        UnregisterHotKey(_handle, id);
+        _handlers.Remove(id);
     }
 
     private static uint ConvertModifiers(ModifierKeys modifiers)
@@ -61,9 +72,9 @@ public class HotkeyService : IDisposable
 
     private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
-        if (msg == WM_HOTKEY && wParam.ToInt32() == HotkeyId)
+        if (msg == WM_HOTKEY && _handlers.TryGetValue(wParam.ToInt32(), out var onPressed))
         {
-            HotkeyPressed?.Invoke();
+            onPressed();
             handled = true;
         }
 
@@ -72,9 +83,10 @@ public class HotkeyService : IDisposable
 
     public void Dispose()
     {
-        if (_registered)
-            UnregisterHotKey(_handle, HotkeyId);
+        foreach (var id in _handlers.Keys)
+            UnregisterHotKey(_handle, id);
 
+        _handlers.Clear();
         _source.RemoveHook(WndProc);
     }
 }

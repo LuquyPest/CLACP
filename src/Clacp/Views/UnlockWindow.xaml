@@ -1,11 +1,14 @@
 <Window x:Class="Clacp.Views.UnlockWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Clacp" Height="260" Width="380"
+        Title="Clacp" Height="300" Width="400"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
-        WindowStyle="SingleBorderWindow">
-    <Grid Margin="20">
+        WindowStyle="SingleBorderWindow"
+        Background="{StaticResource BackgroundBrush}"
+        Foreground="{StaticResource TextPrimaryBrush}"
+        FontFamily="{StaticResource AppFont}">
+    <Grid Margin="28">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -16,16 +19,16 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock x:Name="TitleText" Grid.Row="0" Text="Deverrouiller le coffre" FontSize="18" FontWeight="Bold" Margin="0,0,0,15"/>
+        <TextBlock x:Name="TitleText" Grid.Row="0" Text="Deverrouiller le coffre" FontSize="19" FontWeight="Bold" Margin="0,0,0,20"/>
 
-        <TextBlock Grid.Row="1" Text="Mot de passe maitre" Margin="0,0,0,4"/>
-        <PasswordBox x:Name="PasswordBox1" Grid.Row="2" Padding="6" KeyDown="OnPasswordKeyDown"/>
+        <TextBlock Grid.Row="1" Text="MOT DE PASSE MAITRE" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6"/>
+        <PasswordBox x:Name="PasswordBox1" Grid.Row="2" KeyDown="OnPasswordKeyDown"/>
 
-        <TextBlock x:Name="ConfirmLabel" Grid.Row="3" Text="Confirmer le mot de passe" Margin="0,10,0,4" Visibility="Collapsed"/>
-        <PasswordBox x:Name="PasswordBox2" Grid.Row="4" Padding="6" Visibility="Collapsed" KeyDown="OnPasswordKeyDown"/>
+        <TextBlock x:Name="ConfirmLabel" Grid.Row="3" Text="CONFIRMER LE MOT DE PASSE" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,16,0,6" Visibility="Collapsed"/>
+        <PasswordBox x:Name="PasswordBox2" Grid.Row="4" Visibility="Collapsed" KeyDown="OnPasswordKeyDown"/>
 
-        <TextBlock x:Name="ErrorText" Grid.Row="5" Foreground="Red" TextWrapping="Wrap" Margin="0,10,0,0" VerticalAlignment="Top"/>
+        <TextBlock x:Name="ErrorText" Grid.Row="5" Foreground="{StaticResource DangerBrush}" TextWrapping="Wrap" Margin="0,12,0,0" VerticalAlignment="Top" FontSize="12"/>
 
-        <Button x:Name="ActionButton" Grid.Row="6" Content="Deverrouiller" Padding="10,6" HorizontalAlignment="Right" Click="OnActionClick"/>
+        <Button x:Name="ActionButton" Grid.Row="6" Content="Deverrouiller" HorizontalAlignment="Right" Click="OnActionClick"/>
     </Grid>
 </Window>

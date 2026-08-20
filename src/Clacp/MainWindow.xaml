@@ -5,55 +5,70 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Clacp"
         mc:Ignorable="d"
-        Title="Clacp" Height="480" Width="720"
+        Title="Clacp" Height="520" Width="760"
         WindowStartupLocation="CenterScreen"
+        Background="{StaticResource BackgroundBrush}"
+        Foreground="{StaticResource TextPrimaryBrush}"
+        FontFamily="{StaticResource AppFont}"
         StateChanged="OnStateChanged"
         Closing="OnClosing">
-    <TabControl Margin="15">
-        <TabItem Header="Coffre">
-            <Grid Margin="15">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
-                    <Button x:Name="AddButton" Content="Ajouter" Padding="10,6" Margin="0,0,8,0" Click="OnAddClick"/>
-                    <Button x:Name="EditButton" Content="Modifier" Padding="10,6" Margin="0,0,8,0" Click="OnEditClick"/>
-                    <Button x:Name="DeleteButton" Content="Supprimer" Padding="10,6" Margin="0,0,8,0" Click="OnDeleteClick"/>
-                    <Button x:Name="LockButton" Content="Verrouiller" Padding="10,6" Click="OnLockClick"/>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
+            <TextBlock Text="Clacp" FontSize="22" FontWeight="Bold" VerticalAlignment="Center"/>
+            <TextBlock Text="gestionnaire de mots de passe" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"
+                       VerticalAlignment="Center" Margin="10,4,0,0"/>
+        </StackPanel>
+
+        <TabControl Grid.Row="1">
+            <TabItem Header="COFFRE">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
+                        <Button x:Name="AddButton" Content="Ajouter" Margin="0,0,10,0" Click="OnAddClick"/>
+                        <Button x:Name="EditButton" Content="Modifier" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,0" Click="OnEditClick"/>
+                        <Button x:Name="DeleteButton" Content="Supprimer" Style="{StaticResource DangerButtonStyle}" Margin="0,0,10,0" Click="OnDeleteClick"/>
+                        <Button x:Name="LockButton" Content="Verrouiller" Style="{StaticResource SecondaryButtonStyle}" Click="OnLockClick"/>
+                    </StackPanel>
+
+                    <DataGrid x:Name="EntriesGrid" Grid.Row="1" AutoGenerateColumns="False" IsReadOnly="True"
+                              SelectionMode="Single" MouseDoubleClick="OnEditClick">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="TITRE" Binding="{Binding Title}" Width="2*"/>
+                            <DataGridTextColumn Header="NOM D'UTILISATEUR" Binding="{Binding Username}" Width="2*"/>
+                            <DataGridTextColumn Header="URL" Binding="{Binding Url}" Width="3*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <TextBlock x:Name="HotkeyHint" Grid.Row="2" Margin="0,16,0,0" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="PARAMETRES">
+                <StackPanel MaxWidth="420" HorizontalAlignment="Left">
+                    <TextBlock Text="Delai avant frappe automatique" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                    <TextBlock Text="Temps laisse a la fenetre cible pour reprendre le focus, en millisecondes." Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,8"/>
+                    <TextBox x:Name="DelayBox" Width="150" HorizontalAlignment="Left"/>
+
+                    <TextBlock Text="Raccourci clavier global" FontWeight="SemiBold" Margin="0,28,0,4"/>
+                    <TextBlock Text="Cliquez dans le champ puis appuyez sur la nouvelle combinaison de touches." Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,8"/>
+                    <TextBox x:Name="HotkeyBox" Width="280" HorizontalAlignment="Left"
+                             IsReadOnly="True" Focusable="True" PreviewKeyDown="OnHotkeyBoxPreviewKeyDown"/>
+
+                    <Button x:Name="SaveSettingsButton" Content="Enregistrer" HorizontalAlignment="Left" Margin="0,28,0,0" Click="OnSaveSettingsClick"/>
+
+                    <TextBlock x:Name="SettingsStatusText" Margin="0,14,0,0" FontSize="12"/>
                 </StackPanel>
-
-                <DataGrid x:Name="EntriesGrid" Grid.Row="1" AutoGenerateColumns="False" IsReadOnly="True"
-                          SelectionMode="Single" GridLinesVisibility="Horizontal" MouseDoubleClick="OnEditClick">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Titre" Binding="{Binding Title}" Width="2*"/>
-                        <DataGridTextColumn Header="Nom d'utilisateur" Binding="{Binding Username}" Width="2*"/>
-                        <DataGridTextColumn Header="URL" Binding="{Binding Url}" Width="3*"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-
-                <TextBlock x:Name="HotkeyHint" Grid.Row="2" Margin="0,10,0,0" Foreground="Gray"/>
-            </Grid>
-        </TabItem>
-
-        <TabItem Header="Parametres">
-            <StackPanel Margin="20">
-                <TextBlock Text="Delai avant frappe automatique (millisecondes)" Margin="0,0,0,4"/>
-                <TextBox x:Name="DelayBox" Padding="6" Width="150" HorizontalAlignment="Left"/>
-
-                <TextBlock Text="Raccourci clavier global" Margin="0,20,0,4"/>
-                <TextBox x:Name="HotkeyBox" Padding="6" Width="250" HorizontalAlignment="Left"
-                         IsReadOnly="True" Focusable="True" PreviewKeyDown="OnHotkeyBoxPreviewKeyDown"/>
-                <TextBlock Text="Cliquez dans le champ ci-dessus puis appuyez sur la nouvelle combinaison de touches."
-                           Foreground="Gray" FontSize="11" Margin="0,4,0,0"/>
-
-                <Button x:Name="SaveSettingsButton" Content="Enregistrer" Padding="10,6"
-                        HorizontalAlignment="Left" Margin="0,20,0,0" Click="OnSaveSettingsClick"/>
-
-                <TextBlock x:Name="SettingsStatusText" Foreground="Green" Margin="0,10,0,0"/>
-            </StackPanel>
-        </TabItem>
-    </TabControl>
+            </TabItem>
+        </TabControl>
+    </Grid>
 </Window>

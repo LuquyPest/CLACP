@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+    <AssemblyName>Iptek</AssemblyName>
+    <RootNamespace>Iptek</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Company>Lylian Fredon (Daryu)</Company>
+    <Authors>Lylian Fredon (Daryu)</Authors>
+    <Product>IPTEK</Product>
+    <Copyright>© Lylian Fredon « Daryu » - tous droits reserves</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\app.ico" />
+    <Resource Include="Assets\logo.png" />
+  </ItemGroup>
+
+  <!-- Shared, non-vault-specific source reused from the Clacp project -->
+  <ItemGroup>
+    <Compile Include="..\Clacp\Services\TypingService.cs" Link="Services\TypingService.cs" />
+    <Compile Include="..\Clacp\Services\HotkeyService.cs" Link="Services\HotkeyService.cs" />
+    <Compile Include="..\Clacp\Services\ForegroundWindowHelper.cs" Link="Services\ForegroundWindowHelper.cs" />
+    <Compile Include="..\Clacp\Services\ThemeManager.cs" Link="Services\ThemeManager.cs" />
+    <Compile Include="..\Clacp\Views\ToastNotification.xaml.cs" Link="Views\ToastNotification.xaml.cs">
+      <DependentUpon>ToastNotification.xaml</DependentUpon>
+    </Compile>
+    <Page Include="..\Clacp\Views\ToastNotification.xaml" Link="Views\ToastNotification.xaml" />
+    <Page Include="..\Clacp\Themes\Colors.Dark.xaml" Link="Themes\Colors.Dark.xaml" />
+    <Page Include="..\Clacp\Themes\Colors.Light.xaml" Link="Themes\Colors.Light.xaml" />
+    <Page Include="..\Clacp\Themes\ControlStyles.xaml" Link="Themes\ControlStyles.xaml" />
+  </ItemGroup>
+
+</Project>

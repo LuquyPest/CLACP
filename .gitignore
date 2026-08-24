@@ -12,4 +12,5 @@ obj/
 *.exe
 *.pdb
 publish/
+publish-iptek/
 installer-output/

@@ -179,8 +179,13 @@ public partial class MainWindow : Window
 
     private static async Task TypeTextAsync(string text, IntPtr targetWindow, int delayMs)
     {
-        ForegroundWindowHelper.RestoreForegroundWindow(targetWindow);
         await Task.Delay(delayMs);
+
+        ForegroundWindowHelper.RestoreForegroundWindow(targetWindow);
+        await Task.Delay(150);
+
+        if (ForegroundWindowHelper.GetCurrentForegroundWindow() != targetWindow)
+            return;
 
         await Task.Run(() => TypingService.TypeText(text));
 

@@ -19,7 +19,6 @@
 
   <ItemGroup>
     <Resource Include="Assets\app.ico" />
-    <Resource Include="Assets\logo.png" />
   </ItemGroup>
 
   <!-- Shared, non-vault-specific source reused from the Clacp project -->
